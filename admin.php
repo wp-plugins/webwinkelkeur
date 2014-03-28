@@ -1,6 +1,6 @@
 <?php
 
-class WebwinkelkeurAdmin {
+class WebwinkelKeurAdmin {
     private $woocommerce = false;
 
     public function __construct() {
@@ -11,7 +11,7 @@ class WebwinkelkeurAdmin {
     }
 
     public function admin_menu() {
-        add_submenu_page('plugins.php', __('Webwinkelkeur'), __('Webwinkelkeur'),
+        add_submenu_page('plugins.php', __('WebwinkelKeur'), __('WebwinkelKeur'),
                          'manage_options', 'webwinkelkeur', array($this, 'options_page'));
     }
 
@@ -28,14 +28,24 @@ class WebwinkelkeurAdmin {
 
     public function options_page() {
         $errors = array();
+        $updated = false;
         $fields = array(
             'wwk_shop_id',
             'wwk_api_key',
             'sidebar',
+            'sidebar_position',
+            'sidebar_top',
             'invite',
             'invite_delay',
+            'tooltip',
+            'javascript',
         );
-        $config = array('invite_delay' => 3);
+        $config = array(
+            'invite_delay'     => 3,
+            'sidebar_position' => 'left',
+            'tooltip'          => true,
+            'javascript'       => true,
+        );
 
         foreach($fields as $field_name) {
             $value = get_option('webwinkelkeur_' . $field_name, false);
@@ -57,13 +67,12 @@ class WebwinkelkeurAdmin {
             if($config['invite'] && !$config['wwk_api_key'])
                 $errors[] = __('Om uitnodigingen te versturen is uw API key verplicht.');
 
-            if(!$errors)
+            if(!$errors) {
                 foreach($config as $name => $value)
                     update_option('webwinkelkeur_' . $name, $value);
+                $updated = true;
+            }
         }
-
-        foreach($errors as $error)
-            echo "<div class=error><p>", $error, "</p></div>";
         
         require dirname(__FILE__) . '/options.php';
     }
@@ -81,7 +90,7 @@ class WebwinkelkeurAdmin {
         foreach($errors as $error) {
             ?>
             <div class="error"><p>
-                <?php _e('Bij het versturen van de Webwinkelkeur uitnodiging is een fout opgetreden:') ?><br/>
+                <?php _e('Bij het versturen van de WebwinkelKeur uitnodiging is een fout opgetreden:') ?><br/>
                 <?php echo esc_html($error->response); ?>
             </p></div>
             <?php
@@ -101,4 +110,4 @@ class WebwinkelkeurAdmin {
     }
 }
 
-new WebwinkelkeurAdmin;
+new WebwinkelKeurAdmin;

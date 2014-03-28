@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__FILE__) . '/vendor/Peschar/URLRetriever.php';
-class WebwinkelkeurAPI {
+class WebwinkelKeurAPI {
     private $shop_id;
     private $api_key;
 
@@ -9,26 +9,31 @@ class WebwinkelkeurAPI {
         $this->api_key = (string) $api_key;
     }
 
-    public function invite($order_id, $email, $delay) {
-        $url = $this->buildURL('https://www.webwinkelkeur.nl/api.php', array(
+    public function invite($order_id, $email, $delay, $noremail = false) {
+        $parameters = array(
             'id'        => $this->shop_id,
             'password'  => $this->api_key,
             'order'     => $order_id,
             'email'     => $email,
             'delay'     => $delay,
-        ));
+        );
+
+        if($noremail)
+            $parameters['noremail'] = true;
+
+        $url = $this->buildURL('https://www.webwinkelkeur.nl/api.php', $parameters);
 
         $retriever = new Peschar_URLRetriever();
         $response = $retriever->retrieve($url);
 
         if(!$response) {
-            throw new WebwinkelkeurAPIError($url, 'API not reachable.');
+            throw new WebwinkelKeurAPIError($url, 'API not reachable.');
         } elseif(preg_match('|^\s*Success:|', $response)) {
             return true;
         } elseif(preg_match('|invite already sent|', $response)) {
-            throw new WebwinkelkeurAPIAlreadySentError($url, $response);
+            throw new WebwinkelKeurAPIAlreadySentError($url, $response);
         } else {
-            throw new WebwinkelkeurAPIError($url, $response);
+            throw new WebwinkelKeurAPIError($url, $response);
         }
     }
 
@@ -42,7 +47,7 @@ class WebwinkelkeurAPI {
     }
 }
 
-class WebwinkelkeurAPIError extends Exception {
+class WebwinkelKeurAPIError extends Exception {
     private $url;
 
     public function __construct($url, $message) {
@@ -55,4 +60,4 @@ class WebwinkelkeurAPIError extends Exception {
     }
 }
 
-class WebwinkelkeurAPIAlreadySentError extends WebwinkelkeurAPIError {}
+class WebwinkelKeurAPIAlreadySentError extends WebwinkelKeurAPIError {}
